@@ -82,7 +82,7 @@ int main(int argc , char * argv) {
 }
 /*
 TODO:
-- value assignation is funky, find out why!
+- getHeroArr() always returns the same pointer, data is stored in the same place
 NOTES:
 - if buildHeroArr() doesnt work, try definiing hero_pointer_array as static int
 */
