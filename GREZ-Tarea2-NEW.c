@@ -74,6 +74,7 @@ struct hero getHero(char *line)
         case 24: hero.work__base = dupestr;
         case 25: hero.connections__group_affiliation = dupestr;
         case 26: hero.connections__relatives = dupestr;
+        default: break;
 
         }
     token = strtok(NULL, ";");
