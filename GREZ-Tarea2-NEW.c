@@ -219,8 +219,6 @@ struct hero topHero(struct hero *database, char *target_name, char *attribute)
     else
         selectedAttribute = 7;
     printf("DEBUG: selectedAttribute: %d\n" , selectedAttribute);
-    printf("null string: %s\n", NULL);
-    printf("null dec: %d\n", NULL);
     //search for top heroes by selectedAttribute and fill hero_arr
     while (hero_arr[9].name == 0 && selectedAttribute != 7)
     {
@@ -378,12 +376,16 @@ void queryHero(struct hero *database, struct hero target_hero){
     int combat_pos = 0;
     int intelligence_pos = 0;
 
-
+    
     printf("%s:\n", target_hero.name);
-    printf("\t%s: %d\n", target_hero.durability);
+    printf("\tdurability: %d\n", target_hero.durability);
+    printf("\tpower: %d\n", target_hero.power);
+    printf("\tstrength: %d\n", target_hero.strength);
+    printf("\tspeed: %d\n", target_hero.speed);
+    printf("\tintelligence: %d\n", target_hero.intelligence);
 }
 
-int main(int argc, char *argv)
+int main(int argc, char **argv)
 {
 
     struct hero* database = buildDB();
