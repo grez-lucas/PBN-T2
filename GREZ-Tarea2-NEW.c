@@ -2,43 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-//quicksort implementation SOURCE: https://www.programiz.com/dsa/quick-sort
-// function to swap elements
-void swap(int *a, int *b) {
-  int t = *a;
-  *a = *b;
-  *b = t;
-}
-// function to find the partition position
-int partition(int array[], int low, int high) {
-  int pivot = array[high];
-  int i = (low - 1);
-
-  for (int j = low; j < high; j++) {
-    if (array[j] <= pivot) {
-      i++;
-      swap(&array[i], &array[j]);
-    }
-  }
-  swap(&array[i + 1], &array[high]);
-  return (i + 1);
-}
-void quickSort(int array[], int low, int high) {
-  if (low < high) {
-    
-    // find the pivot element such that
-    // elements smaller than pivot are on left of pivot
-    // elements greater than pivot are on right of pivot
-    int pi = partition(array, low, high);
-    
-    // recursive call on the left of pivot
-    quickSort(array, low, pi - 1);
-    
-    // recursive call on the right of pivot
-    quickSort(array, pi + 1, high);
-  }
-}
-
 struct hero
 {
     int id;
@@ -181,7 +144,7 @@ struct hero *buildDB(){
     return hero_arr;
 }
 
-struct hero topHero(struct hero *database, char *target_name, char *attribute)
+struct hero topHeroByName(struct hero *database, char *target_name, char *attribute)
 {
     int input;
     int betterBy = 1;
@@ -356,6 +319,172 @@ struct hero topHero(struct hero *database, char *target_name, char *attribute)
     return hero_arr[input - 1]; //return only the hero who's information is to be seen
 }
 
+struct hero topHeroByValue(struct hero *database, int target_value, char *attribute)
+{
+    int input;
+    int betterBy = 1;
+    int selectedAttribute;
+    static struct hero *hero_arr;
+    struct hero target_hero;
+
+
+    hero_arr = calloc(11, sizeof(struct hero));
+    // define selectedAttribute
+    int counter = 0;
+    if (strcmp(attribute, "id") == 0)
+        selectedAttribute = 0;
+    else if (strcmp(attribute, "intelligence") == 0)
+        selectedAttribute = 1;
+    else if (strcmp(attribute, "strength") == 0)
+        selectedAttribute = 2;
+    else if (strcmp(attribute, "speed") == 0)
+        selectedAttribute = 3;
+    else if (strcmp(attribute, "durability") == 0)
+        selectedAttribute = 4;
+    else if (strcmp(attribute, "power") == 0)
+        selectedAttribute = 5;
+    else if (strcmp(attribute, "combat") == 0)
+        selectedAttribute = 6;
+    else
+        selectedAttribute = 7;
+    //search for top heroes by selectedAttribute and fill hero_arr
+    while (hero_arr[9].name == 0 && target_value >= 0 && selectedAttribute != 7)
+    {
+        switch (selectedAttribute)
+        {
+        case 0:
+            for (int i = 0; i < 731; i++)
+            {
+                if (database[i].id - target_value == betterBy)
+                {
+                    hero_arr[counter] = database[i];
+                    counter++;
+                }
+            }
+            break;
+        case 1:
+            for (int i = 0; i < 731; i++)
+            {
+                if (database[i].intelligence - target_value == betterBy)
+                {
+                    hero_arr[counter] = database[i];
+                    counter++;
+                }
+            }
+            break;
+        case 2:
+            for (int i = 0; i < 731; i++)
+            {
+                if (database[i].strength - target_value == betterBy)
+                {
+                    hero_arr[counter] = database[i];
+                    counter++;
+                }
+            }
+            break;
+        case 3:
+            for (int i = 0; i < 731; i++)
+            {
+                if (database[i].speed - target_value == betterBy)
+                {
+                    hero_arr[counter] = database[i];
+                    counter++;
+                }
+            }
+            break;
+        case 4:
+            for (int i = 0; i < 731; i++)
+            {
+                if (database[i].durability - target_value == betterBy)
+                {
+                    hero_arr[counter] = database[i];
+                    counter++;
+                }
+            }
+            break;
+        case 5:
+            for (int i = 0; i < 731; i++)
+            {
+                if (database[i].power - target_value == betterBy)
+                {
+                    hero_arr[counter] = database[i];
+                    counter++;
+                }
+            }
+            break;
+        case 6:
+            for (int i = 0; i < 731; i++)
+            {
+                if (database[i].combat - target_value == betterBy)
+                {
+                    hero_arr[counter] = database[i];
+                    counter++;
+                }
+            }
+            break;
+
+        }
+        betterBy += 1;
+    }
+    // print result
+    printf("Query by ");
+    switch (selectedAttribute)
+    {
+    case 0:
+        printf("%s: %d\n" , attribute, target_value);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].id);
+        }
+        break;
+    case 1:
+        printf("%s: %d\n" , attribute, target_value);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].intelligence);
+        }
+        break;
+    case 2:
+        printf("%s: %d\n" , attribute, target_value);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].strength);
+        }
+        break;
+    case 3:
+        printf("%s: %d\n" , attribute, target_value);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].speed);
+        }
+        break;
+    case 4:
+        printf("%s: %d\n" , attribute, target_value);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].durability);
+        }
+        break;
+    case 5:
+        printf("%s: %d\n" , attribute, target_value);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].power);
+        }
+        break;
+    case 6:
+        printf("%s: %d\n" , attribute, target_value);
+        for (int i = 0; i < 10; i++)
+        {
+            printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].combat);
+        }
+        break;
+    }
+    printf("de que superheroe desea ver su informacion?\n");
+    scanf("%d", &input);
+    return hero_arr[input - 1]; //return only the hero who's information is to be seen
+}
+
 void queryHero(struct hero *database, struct hero target_hero){
     // search for target hero
     for (int i = 0; i < 731; i++)
@@ -406,8 +535,9 @@ int main(int argc, char **argv)
     char* att = "power";
     char* thero ="Black Cat";
     //printf("%s \n", att);
-    //struct hero heroq = topHero(database, thero, att);
-    queryHero(database, hero1);
+    //struct hero heroq = topHeroByName(database, thero, att);
+    struct hero heroq = topHeroByValue(database, 50, att);
+    //queryHero(database, hero1);
 
     free(database);
     return 0;
@@ -415,6 +545,7 @@ int main(int argc, char **argv)
 /*
 TODO:
 - Remove DEBUG: comments
+- Add input error messages
 NOTES:
 - 
 */
