@@ -70,36 +70,35 @@ struct hero
     char *connections__relatives;
 };
 
-int attrComparator(const void *v1, const void *v2){
+int intCompare(const void * e1, const void * e2) {
+return *(int*)e2-*(int*)e1;
+}
+
+int durabilityComparator(const void *v1, const void *v2){
     const struct hero *p1 = (struct hero *)v1;
     const struct hero *p2 = (struct hero *)v2;
-    if (p1->durability < p2->durability)
-        return -1;
-    else if (p1->durability > p2->durability)
-        return +1;
-    else if (p1->power < p2->power)
-        return -1;
-    else if (p1->power > p2->power)
-        return +1;
-    else if (p1->strength < p2->strength)
-        return -1;
-    else if (p1->strength > p2->strength)
-        return +1;
-    else if (p1->speed < p2->speed)
-        return -1;
-    else if (p1->speed > p2->speed)
-        return +1;
-    else if (p1->combat < p2->combat)
-        return -1;
-    else if (p1->combat > p2->combat)
-        return +1;
-    else if (p1->intelligence < p2->intelligence)
-        return -1;
-    else if (p1->intelligence > p2->intelligence)
-        return +1;
-    else
-        return 0;
-}
+    return (p2->durability - p1->durability);}
+int powerComparator(const void *v1, const void *v2){
+    const struct hero *p1 = (struct hero *)v1;
+    const struct hero *p2 = (struct hero *)v2;
+    return (p2->power - p1->power);}
+int strengthComparator(const void *v1, const void *v2){
+    const struct hero *p1 = (struct hero *)v1;
+    const struct hero *p2 = (struct hero *)v2;
+    return (p2->strength - p1->strength);}
+int speedComparator(const void *v1, const void *v2){
+    const struct hero *p1 = (struct hero *)v1;
+    const struct hero *p2 = (struct hero *)v2;
+    return (p2->speed - p1->speed);}
+int combatComparator(const void *v1, const void *v2){
+    const struct hero *p1 = (struct hero *)v1;
+    const struct hero *p2 = (struct hero *)v2;
+    return (p2->combat - p1->combat);}
+int intelligenceComparator(const void *v1, const void *v2){
+    const struct hero *p1 = (struct hero *)v1;
+    const struct hero *p2 = (struct hero *)v2;
+    return (p2->intelligence - p1->intelligence);}
+
 
 struct hero getHero(char *line)
 {
@@ -366,23 +365,33 @@ void queryHero(struct hero *database, struct hero target_hero){
             target_hero = database[i]; // WATCHOUT for what is a copy and what is database info
             break;
         };
-    } printf("DEBUG: taget_hero name: %s\n" , target_hero.name);
+    }
 
     // find position of each attribute
-    int durability_pos = 0;
-    int power_pos = 0;
-    int strength_pos = 0;
-    int speed_pos = 0;
-    int combat_pos = 0;
-    int intelligence_pos = 0;
-
+    int n = 731;
+    int (*ff[])(const void*, const void*) = { durabilityComparator, powerComparator,
+                        strengthComparator, speedComparator,
+                        combatComparator, intelligenceComparator};
+    int positions[] = {0,0,0,0,0,0};
     
+    for(int i=0;i<6;i++){
+        qsort(database, n, sizeof(struct hero), ff[i]);
+        for(int j=0;j<731;j++){
+            if(database[j].id == target_hero.id){
+                break;
+            }
+            positions[i] ++;
+        }
+    }
+
+
     printf("%s:\n", target_hero.name);
-    printf("\tdurability: %d\n", target_hero.durability);
-    printf("\tpower: %d\n", target_hero.power);
-    printf("\tstrength: %d\n", target_hero.strength);
-    printf("\tspeed: %d\n", target_hero.speed);
-    printf("\tintelligence: %d\n", target_hero.intelligence);
+    printf("\tdurability: %d posicion: %d\n", target_hero.durability, positions[0]);
+    printf("\tpower: %d posicion: %d\n", target_hero.power, positions[1]);
+    printf("\tstrength: %d posicion: %d\n", target_hero.strength, positions[2]);
+    printf("\tspeed: %d posicion: %d\n", target_hero.speed, positions[3]);
+    printf("\tcombat: %d posicion: %d\n", target_hero.combat, positions[4]);
+    printf("\tintelligence: %d posicion: %d\n", target_hero.intelligence, positions[5]);
 }
 
 int main(int argc, char **argv)
@@ -393,18 +402,19 @@ int main(int argc, char **argv)
         printf("%d ", database[i].id);
         printf("%s \n", database[i].name);
     }
-
+    struct hero hero1 = database[0];
     char* att = "power";
     char* thero ="Black Cat";
     //printf("%s \n", att);
-    struct hero heroq = topHero(database, thero, att);
+    //struct hero heroq = topHero(database, thero, att);
+    queryHero(database, hero1);
 
     free(database);
     return 0;
 }
 /*
 TODO:
-- 
+- Remove DEBUG: comments
 NOTES:
 - 
 */
