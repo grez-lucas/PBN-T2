@@ -38,6 +38,7 @@ void quickSort(int array[], int low, int high) {
     quickSort(array, pi + 1, high);
   }
 }
+
 struct hero
 {
     int id;
@@ -68,6 +69,37 @@ struct hero
     char *connections__group_affiliation;
     char *connections__relatives;
 };
+
+int attrComparator(const void *v1, const void *v2){
+    const struct hero *p1 = (struct hero *)v1;
+    const struct hero *p2 = (struct hero *)v2;
+    if (p1->durability < p2->durability)
+        return -1;
+    else if (p1->durability > p2->durability)
+        return +1;
+    else if (p1->power < p2->power)
+        return -1;
+    else if (p1->power > p2->power)
+        return +1;
+    else if (p1->strength < p2->strength)
+        return -1;
+    else if (p1->strength > p2->strength)
+        return +1;
+    else if (p1->speed < p2->speed)
+        return -1;
+    else if (p1->speed > p2->speed)
+        return +1;
+    else if (p1->combat < p2->combat)
+        return -1;
+    else if (p1->combat > p2->combat)
+        return +1;
+    else if (p1->intelligence < p2->intelligence)
+        return -1;
+    else if (p1->intelligence > p2->intelligence)
+        return +1;
+    else
+        return 0;
+}
 
 struct hero getHero(char *line)
 {
@@ -337,7 +369,16 @@ void queryHero(struct hero *database, struct hero target_hero){
             break;
         };
     } printf("DEBUG: taget_hero name: %s\n" , target_hero.name);
+
     // find position of each attribute
+    int durability_pos = 0;
+    int power_pos = 0;
+    int strength_pos = 0;
+    int speed_pos = 0;
+    int combat_pos = 0;
+    int intelligence_pos = 0;
+
+
     printf("%s:\n", target_hero.name);
     printf("\t%s: %d\n", target_hero.durability);
 }
