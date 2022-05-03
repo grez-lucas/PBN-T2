@@ -182,7 +182,9 @@ struct hero *buildDB(){
 }
 
 struct hero searchTargetHero(struct hero *database, char*target_name){
-    struct hero target_hero;
+    struct hero target_hero = { 0,NULL,0,0,0,0,0,0,NULL,NULL,NULL,NULL,NULL,
+                                NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+                                NULL,};
     // search for target hero
     for (int i = 0; i < 731; i++)
     {
@@ -191,21 +193,11 @@ struct hero searchTargetHero(struct hero *database, char*target_name){
             target_hero = database[i]; // WATCHOUT for what is a copy and what is database info
             break;
         };
-    } printf("DEBUG: taget_hero name: %s\n" , target_hero.name);
+    } 
     return target_hero;
 }
 
 void queryHero(struct hero *database, struct hero target_hero){
-    // search for target hero
-    for (int i = 0; i < 731; i++)
-    {
-        if (strcmp(database[i].name, target_hero.name) == 0)
-        {
-            target_hero = database[i]; // WATCHOUT for what is a copy and what is database info
-            break;
-        };
-    }
-
     // find position of each attribute
     int n = 731;
     int (*ff[])(const void*, const void*) = { durabilityComparator, powerComparator,
@@ -243,6 +235,10 @@ struct hero topHeroByName(struct hero *database, char *target_name, char *attrib
 
     target_hero = searchTargetHero(database, target_name);
 
+    if(target_hero.name == NULL){
+        return target_hero;
+    }
+
     hero_arr = calloc(11, sizeof(struct hero));
     // define selectedAttribute
     int counter = 0;
@@ -262,7 +258,6 @@ struct hero topHeroByName(struct hero *database, char *target_name, char *attrib
         selectedAttribute = 6;
     else
         selectedAttribute = 7;
-    printf("DEBUG: selectedAttribute: %d\n" , selectedAttribute);
     //search for top heroes by selectedAttribute and fill hero_arr
     while (hero_arr[9].name == 0 && selectedAttribute != 7)
     {
@@ -342,7 +337,6 @@ struct hero topHeroByName(struct hero *database, char *target_name, char *attrib
         }
         betterBy += 1;
     }
-    printf("DEBUG: 1st hero's name: %s\n" , hero_arr[0].name);
     // print result
     switch (selectedAttribute)
     {
@@ -565,6 +559,13 @@ struct hero topHeroByValue(struct hero *database, int target_value, char *attrib
     return hero_arr[atoi(input) - 1]; //return only the hero who's information is to be seen
 }
 
+int nullHeroError(struct hero target_hero){
+    if(target_hero.name == NULL){
+        printf("ERROR: Heroe no encontrado\n");
+        return 1;
+    }
+    return 0;
+}
 
 int main(int argc, char **argv)
 {
@@ -575,12 +576,6 @@ int main(int argc, char **argv)
     int programMode = 0;
     char **input_arr = (char **)malloc(4 * 1024);
     char* buffer = malloc(1024);
-
-        // DEBUG :
-    for (int i = 1; i < argc; i++)
-    {
-        printf("arg%d=%s\n", i, argv[i]);
-    }
 
     if(argc == 1){
         printf("Porfavor especifique como desea correr el programa\n");
@@ -596,7 +591,6 @@ int main(int argc, char **argv)
         fgets(input, 1024, stdin);
 
         buffer = strdup(input);
-        //DEBUG: for(int i = 0; i<731;i++) printf("%s\n", database[i].name);
         input_arr = terminalDecodeStr(buffer, 1);
 
         if (strcmp(buffer, "salir") == 0)
@@ -605,14 +599,15 @@ int main(int argc, char **argv)
         if (strcmp(input_arr[0], "tophero") == 0)
         {
             heroq = topHeroByName(database, input_arr[2], input_arr[1]);
+            if(nullHeroError(heroq)) break;
             queryHero(database, heroq);
             continue;
         }
         else if (strcmp(input_arr[0], "hero") == 0)
         {
-            input_arr = terminalDecodeStr(input, 0); //probar jugando con buffer y input
-            for(int i=0; i<3; i++) printf("%s\n", input_arr[i]);
+            input_arr = terminalDecodeStr(input, 0);
             heroq = searchTargetHero(database, input_arr[1]);
+            if(nullHeroError(heroq)) break;
             queryHero(database, heroq);
             continue;
         }
@@ -638,6 +633,10 @@ int main(int argc, char **argv)
         }
         if (strcmp(argv[1], "-tophero") == 0)
         {
+            if(argc < 4){
+                printf("ERROR: Se esperaban al menos 3 argumentos\n");
+                break;
+            } 
 
             // get hero name block
             char *target_hero_name = malloc(1024);
@@ -649,7 +648,6 @@ int main(int argc, char **argv)
                 if(i == size) break;
                 strcat(target_hero_name, " ");
             }
-            printf("DEBUG: %s.\n", target_hero_name);
 
             //do query
             struct hero heroq = topHeroByName(database, target_hero_name, argv[2]);
@@ -658,7 +656,10 @@ int main(int argc, char **argv)
         }
         else if (strcmp(argv[1], "-hero") == 0)
         {
-
+            if(argc < 3){
+                printf("ERROR: Se esperaban al menos 2 argumentos\n");
+                break;
+            } 
             // get hero name block
             char *target_hero_name = malloc(1024);
             int i, v = 0, size = argc - 1;
@@ -669,7 +670,6 @@ int main(int argc, char **argv)
                 if(i == size) break;
                 strcat(target_hero_name, " ");
             }
-            printf("DEBUG: %s.\n", target_hero_name);
             //do query
             struct hero heroq = searchTargetHero(database, target_hero_name);
             queryHero(database, heroq);
@@ -677,6 +677,14 @@ int main(int argc, char **argv)
         }
 
         else if (strcmp(argv[1], "-topvalue") == 0){
+            if(argc < 4){
+                printf("ERROR: Se esperaban al menos 3 argumentos\n");
+                break;
+            }
+            if(atoi(argv[3]) > 731 || atoi(argv[3]) < 0){
+                printf("ERROR: valor no valido\n");
+                break;
+            }
             struct hero heroq = topHeroByValue(database, atoi(argv[3]), argv[2]);
             queryHero(database, heroq);
             break;
@@ -685,26 +693,9 @@ int main(int argc, char **argv)
     }
 
 
-
-    //struct hero hero1 = database[0];
-    //char* att = "power";
-    //char* thero ="Black Cat";
-    //printf("%s \n", att);
-    //struct hero heroq = topHeroByName(database, thero, att);
-    //struct hero heroq = topHeroByValue(database, 50, att);
-    //queryHero(database, hero1);
-    //free(heroq);
     free(buffer);
     free(input);
     free(input_arr);
     free(database);
     return 0;
 }
-/*
-TODO:
-- Remove DEBUG: comments
-- Add input error messages
-- ID ugly print
-NOTES:
-- 
-*/
