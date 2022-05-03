@@ -324,7 +324,7 @@ struct hero topHeroByName(struct hero *database, char *target_name, char *attrib
     switch (selectedAttribute)
     {
     case 0:
-        printf("%s: %d" , target_hero.name, target_hero.id);
+        printf("%s: %d\n" , target_hero.name, target_hero.id);
         for (int i = 0; i < 10; i++)
         {
             printf("\t\t%d) %s: %d\n", i + 1, hero_arr[i].name, hero_arr[i].id);
@@ -380,7 +380,7 @@ struct hero topHeroByName(struct hero *database, char *target_name, char *attrib
 
 struct hero topHeroByValue(struct hero *database, int target_value, char *attribute)
 {
-    int input;
+    char* input = (char*)malloc(1);
     int betterBy = 1;
     int selectedAttribute;
     static struct hero *hero_arr;
@@ -538,8 +538,8 @@ struct hero topHeroByValue(struct hero *database, int target_value, char *attrib
         break;
     }
     printf("de que superheroe desea ver su informacion?\n");
-    scanf("%d", &input);
-    return hero_arr[input - 1]; //return only the hero who's information is to be seen
+    fgets(input, 1024, stdin);
+    return hero_arr[atoi(input) - 1]; //return only the hero who's information is to be seen
 }
 
 
@@ -563,7 +563,7 @@ int main(int argc, char **argv)
     // terminal mode
     while (programMode == 1)
     {
-        printf("Ingrese una consulta:\te.g: tophero power Black Cat\n");
+        printf("Ingrese una consulta:\te.g: tophero power Black Cat / power 80 / salir\n");
         fgets(input, 1024, stdin);
 
         buffer = strdup(input);
@@ -579,7 +579,7 @@ int main(int argc, char **argv)
             queryHero(database, heroq);
             continue;
         }
-        else if (atoi(input_arr[1]) && atoi(input_arr[1]) >= 0 && atoi(input_arr[1]) <= 731)
+        else if (atoi(input_arr[1]) >= 0 && atoi(input_arr[1]) <= 731)
         {
             heroq = topHeroByValue(database, atoi(input_arr[1]), input_arr[0]);
             queryHero(database, heroq);
@@ -654,7 +654,7 @@ int main(int argc, char **argv)
 TODO:
 - Remove DEBUG: comments
 - Add input error messages
-- Check how many times command prompt loops?
+- ID ugly print
 NOTES:
 - 
 */
