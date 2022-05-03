@@ -599,7 +599,7 @@ int main(int argc, char **argv)
         if (strcmp(input_arr[0], "tophero") == 0)
         {
             heroq = topHeroByName(database, input_arr[2], input_arr[1]);
-            if(nullHeroError(heroq)) break;
+            if(nullHeroError(heroq)) continue;
             queryHero(database, heroq);
             continue;
         }
@@ -607,12 +607,16 @@ int main(int argc, char **argv)
         {
             input_arr = terminalDecodeStr(input, 0);
             heroq = searchTargetHero(database, input_arr[1]);
-            if(nullHeroError(heroq)) break;
+            if(nullHeroError(heroq)) continue;
             queryHero(database, heroq);
             continue;
         }
         else if (atoi(input_arr[1]) >= 0 && atoi(input_arr[1]) <= 731)
         {
+            if(atoi(input_arr[1]) <= 0 || atoi(input_arr[1]) >= 731){
+                printf("ERROR: Valor no valido\n");
+                continue;
+            }
             heroq = topHeroByValue(database, atoi(input_arr[1]), input_arr[0]);
             queryHero(database, heroq);
             continue;
