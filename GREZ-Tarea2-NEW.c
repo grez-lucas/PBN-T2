@@ -589,7 +589,35 @@ int main(int argc, char **argv)
             printf("Insuficientes comandos\n");
             break;
         }
+        if (strcmp(argv[1], "-tophero"))
+        {
 
+            // get hero name block
+            char *target_hero_name = malloc(1024);
+            target_hero_name = argv[3];
+            switch (argc)
+            {
+            case 5:
+                strcat(target_hero_name, " ");
+                strcat(target_hero_name, argv[4]);
+                break;
+            case 6:
+                strcat(target_hero_name, " ");
+                strcat(target_hero_name, argv[4]);
+                strcat(target_hero_name, " ");
+                strcat(target_hero_name, argv[5]);
+                break;
+            }
+            //do query
+            struct hero heroq = topHeroByName(database, target_hero_name, argv[2]);
+            queryHero(database, heroq);
+        }
+
+        else if (strcmp(argv[1], "-topvalue")){
+            struct hero heroq = topHeroByValue(database, atoi(argv[3]), argv[2]);
+            queryHero(database, heroq);
+        }
+        else printf("Invalid command\n");
     }
 
     // DEBUG :
@@ -614,6 +642,7 @@ int main(int argc, char **argv)
 TODO:
 - Remove DEBUG: comments
 - Add input error messages
+- Check how many times command prompt loops?
 NOTES:
 - 
 */
