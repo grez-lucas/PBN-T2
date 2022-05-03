@@ -689,7 +689,7 @@ int main(int argc, char **argv)
             queryHero(database, heroq);
             break;
         }
-        else printf("Invalid command\n");
+        else {printf("Invalid command\n"); break;}
     }
 
 
