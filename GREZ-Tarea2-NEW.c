@@ -33,6 +33,28 @@ struct hero
     char *connections__relatives;
 };
 
+char** terminalDecodeStr(char* line){
+    int i = 0;
+    line[strcspn(line, "\n")] = 0;
+    char *p = strtok (line, " ");
+    static char** array;
+    array = malloc(3*1024);
+    char* dupestr;
+
+    while (p != NULL)
+    {   
+        if(i>2){
+            dupestr = strdup(p);
+            strcat(array[2], " ");
+            strcat(array[2], dupestr);
+            break;
+        }
+        array[i++] = p;
+        p = strtok (NULL, " ");
+    }
+    return array;
+}
+
 int intCompare(const void * e1, const void * e2) {
 return *(int*)e2-*(int*)e1;
 }
@@ -65,7 +87,6 @@ int intelligenceComparator(const void *v1, const void *v2){
 
 struct hero getHero(char *line)
 {
-    int valueTypeOrder[] = {0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     line +=1;
     char *token = strtok(line, ";");
     int i = 0;
@@ -77,33 +98,33 @@ struct hero getHero(char *line)
         dupestr = strdup(token);
         //printf("%s\n",dupestr);
         switch(i) {
-        case 0: hero.id = atoi(dupestr);
-        case 1: hero.name = dupestr;
-        case 2: hero.intelligence = atoi(dupestr);
-        case 3: hero.strength = atoi(dupestr);
-        case 4: hero.speed = atoi(dupestr);
-        case 5: hero.durability = atoi(dupestr);
-        case 6: hero.power = atoi(dupestr);
-        case 7: hero.combat = atoi(dupestr);
-        case 8: hero.full_name = dupestr;
-        case 9: hero.alter_egos = dupestr;
-        case 10: hero.aliases__001 = dupestr;
-        case 11: hero.place_of_birth = dupestr;
-        case 12: hero.first_appearance = dupestr;
-        case 13: hero.publisher = dupestr;
-        case 14: hero.allignment = dupestr;
-        case 15: hero.gender = dupestr;
-        case 16: hero.race = dupestr;
-        case 17: hero.height__001 = dupestr;
-        case 18: hero.height__002 = dupestr;
-        case 19: hero.weight__001 = dupestr;
-        case 20: hero.weight__002 = dupestr;
-        case 21: hero.eye_color = dupestr;
-        case 22: hero.hair_color = dupestr;
-        case 23: hero.work__occupation = dupestr;
-        case 24: hero.work__base = dupestr;
-        case 25: hero.connections__group_affiliation = dupestr;
-        case 26: hero.connections__relatives = dupestr;
+        case 0: hero.id = atoi(dupestr);break;
+        case 1: hero.name = dupestr;break;
+        case 2: hero.intelligence = atoi(dupestr);break;
+        case 3: hero.strength = atoi(dupestr);break;
+        case 4: hero.speed = atoi(dupestr);break;
+        case 5: hero.durability = atoi(dupestr);break;
+        case 6: hero.power = atoi(dupestr);break;
+        case 7: hero.combat = atoi(dupestr);break;
+        case 8: hero.full_name = dupestr;break;
+        case 9: hero.alter_egos = dupestr;break;
+        case 10: hero.aliases__001 = dupestr;break;
+        case 11: hero.place_of_birth = dupestr;break;
+        case 12: hero.first_appearance = dupestr;break;
+        case 13: hero.publisher = dupestr;break;
+        case 14: hero.allignment = dupestr;break;
+        case 15: hero.gender = dupestr;break;
+        case 16: hero.race = dupestr;break;
+        case 17: hero.height__001 = dupestr;break;
+        case 18: hero.height__002 = dupestr;break;
+        case 19: hero.weight__001 = dupestr;break;
+        case 20: hero.weight__002 = dupestr;break;
+        case 21: hero.eye_color = dupestr;break;
+        case 22: hero.hair_color = dupestr;break;
+        case 23: hero.work__occupation = dupestr; break;
+        case 24: hero.work__base = dupestr;break;
+        case 25: hero.connections__group_affiliation = dupestr;break;
+        case 26: hero.connections__relatives = dupestr;break;
         default: break;
 
         }
@@ -325,8 +346,6 @@ struct hero topHeroByValue(struct hero *database, int target_value, char *attrib
     int betterBy = 1;
     int selectedAttribute;
     static struct hero *hero_arr;
-    struct hero target_hero;
-
 
     hero_arr = calloc(11, sizeof(struct hero));
     // define selectedAttribute
@@ -526,19 +545,68 @@ void queryHero(struct hero *database, struct hero target_hero){
 int main(int argc, char **argv)
 {
 
-    struct hero* database = buildDB();
-    for(int i =0; i<5; i++){
-        printf("%d ", database[i].id);
-        printf("%s \n", database[i].name);
+    struct hero *database = buildDB();
+    char *input = malloc(1024);
+    int programMode = 0;
+    char **input_arr = (char **)malloc(3 * 20);
+
+    if (strcmp(argv[1], "-terminal") == 0 && argc > 0)
+        programMode = 1;
+    // terminal mode
+    while (programMode == 1)
+    {
+        printf("Ingrese una consulta:\te.g: tophero power Black Cat\n");
+        fgets(input, 1024, stdin);
+
+        if (strcmp(input, "salir") == 0)
+            break;
+
+        input_arr = terminalDecodeStr(input);
+
+        if (strcmp(input_arr[0], "tophero") == 0)
+        {
+            struct hero heroq = topHeroByName(database, input_arr[2], input_arr[1]);
+            queryHero(database, heroq);
+            continue;
+        }
+        else if (atoi(input_arr[1]) && atoi(input_arr[1]) >= 0 && atoi(input_arr[1]) <= 731)
+        {
+            struct hero heroq = topHeroByValue(database, atoi(input_arr[1]), input_arr[0]);
+            queryHero(database, heroq);
+            continue;
+        }
+        else
+        {
+            printf("Invalid command\n");
+            continue;
+        }
     }
-    struct hero hero1 = database[0];
-    char* att = "power";
-    char* thero ="Black Cat";
+    // command line mode
+    while (programMode == 0)
+    {
+        if (argc < 2)
+        {
+            printf("Insuficientes comandos\n");
+            break;
+        }
+
+    }
+
+    // DEBUG :
+    for (int i = 1; i < argc; i++)
+    {
+        printf("\narg%d=%s", i, argv[i]);
+    }
+
+    //struct hero hero1 = database[0];
+    //char* att = "power";
+    //char* thero ="Black Cat";
     //printf("%s \n", att);
     //struct hero heroq = topHeroByName(database, thero, att);
-    struct hero heroq = topHeroByValue(database, 50, att);
+    //struct hero heroq = topHeroByValue(database, 50, att);
     //queryHero(database, hero1);
-
+    free(input_arr);
+    free(input);
     free(database);
     return 0;
 }
