@@ -165,9 +165,47 @@ struct hero *buildDB(){
     return hero_arr;
 }
 
+void queryHero(struct hero *database, struct hero target_hero){
+    // search for target hero
+    for (int i = 0; i < 731; i++)
+    {
+        if (strcmp(database[i].name, target_hero.name) == 0)
+        {
+            target_hero = database[i]; // WATCHOUT for what is a copy and what is database info
+            break;
+        };
+    }
+
+    // find position of each attribute
+    int n = 731;
+    int (*ff[])(const void*, const void*) = { durabilityComparator, powerComparator,
+                        strengthComparator, speedComparator,
+                        combatComparator, intelligenceComparator};
+    int positions[] = {0,0,0,0,0,0};
+    
+    for(int i=0;i<6;i++){
+        qsort(database, n, sizeof(struct hero), ff[i]);
+        for(int j=0;j<731;j++){
+            if(database[j].id == target_hero.id){
+                break;
+            }
+            positions[i] ++;
+        }
+    }
+
+
+    printf("%s:\n", target_hero.name);
+    printf("\tdurability: %d posicion: %d\n", target_hero.durability, positions[0]);
+    printf("\tpower: %d posicion: %d\n", target_hero.power, positions[1]);
+    printf("\tstrength: %d posicion: %d\n", target_hero.strength, positions[2]);
+    printf("\tspeed: %d posicion: %d\n", target_hero.speed, positions[3]);
+    printf("\tcombat: %d posicion: %d\n", target_hero.combat, positions[4]);
+    printf("\tintelligence: %d posicion: %d\n", target_hero.intelligence, positions[5]);
+}
+
 struct hero topHeroByName(struct hero *database, char *target_name, char *attribute)
 {
-    int input;
+    char* input = (char*)malloc(1);
     int betterBy = 1;
     int selectedAttribute;
     static struct hero *hero_arr;
@@ -336,8 +374,8 @@ struct hero topHeroByName(struct hero *database, char *target_name, char *attrib
         break;
     }
     printf("de que superheroe desea ver su informacion?\n");
-    scanf("%d", &input);
-    return hero_arr[input - 1]; //return only the hero who's information is to be seen
+    fgets(input, 1024, stdin);
+    return hero_arr[atoi(input) - 1]; //return only the hero who's information is to be seen
 }
 
 struct hero topHeroByValue(struct hero *database, int target_value, char *attribute)
@@ -504,51 +542,21 @@ struct hero topHeroByValue(struct hero *database, int target_value, char *attrib
     return hero_arr[input - 1]; //return only the hero who's information is to be seen
 }
 
-void queryHero(struct hero *database, struct hero target_hero){
-    // search for target hero
-    for (int i = 0; i < 731; i++)
-    {
-        if (strcmp(database[i].name, target_hero.name) == 0)
-        {
-            target_hero = database[i]; // WATCHOUT for what is a copy and what is database info
-            break;
-        };
-    }
-
-    // find position of each attribute
-    int n = 731;
-    int (*ff[])(const void*, const void*) = { durabilityComparator, powerComparator,
-                        strengthComparator, speedComparator,
-                        combatComparator, intelligenceComparator};
-    int positions[] = {0,0,0,0,0,0};
-    
-    for(int i=0;i<6;i++){
-        qsort(database, n, sizeof(struct hero), ff[i]);
-        for(int j=0;j<731;j++){
-            if(database[j].id == target_hero.id){
-                break;
-            }
-            positions[i] ++;
-        }
-    }
-
-
-    printf("%s:\n", target_hero.name);
-    printf("\tdurability: %d posicion: %d\n", target_hero.durability, positions[0]);
-    printf("\tpower: %d posicion: %d\n", target_hero.power, positions[1]);
-    printf("\tstrength: %d posicion: %d\n", target_hero.strength, positions[2]);
-    printf("\tspeed: %d posicion: %d\n", target_hero.speed, positions[3]);
-    printf("\tcombat: %d posicion: %d\n", target_hero.combat, positions[4]);
-    printf("\tintelligence: %d posicion: %d\n", target_hero.intelligence, positions[5]);
-}
 
 int main(int argc, char **argv)
 {
 
     struct hero *database = buildDB();
+    struct hero heroq;
     char *input = malloc(1024);
     int programMode = 0;
-    char **input_arr = (char **)malloc(3 * 20);
+    char **input_arr = (char **)malloc(4 * 1024);
+    char* buffer = malloc(1024);
+
+    if(argc == 1){
+        printf("Porfavor especifique como desea correr el programa\n");
+        return 0;
+    }
 
     if (strcmp(argv[1], "-terminal") == 0 && argc > 0)
         programMode = 1;
@@ -558,26 +566,28 @@ int main(int argc, char **argv)
         printf("Ingrese una consulta:\te.g: tophero power Black Cat\n");
         fgets(input, 1024, stdin);
 
-        if (strcmp(input, "salir") == 0)
-            break;
+        buffer = strdup(input);
+        //DEBUG: for(int i = 0; i<731;i++) printf("%s\n", database[i].name);
+        input_arr = terminalDecodeStr(buffer);
 
-        input_arr = terminalDecodeStr(input);
+        if (strcmp(buffer, "salir") == 0)
+            return 0;
 
         if (strcmp(input_arr[0], "tophero") == 0)
         {
-            struct hero heroq = topHeroByName(database, input_arr[2], input_arr[1]);
+            heroq = topHeroByName(database, input_arr[2], input_arr[1]);
             queryHero(database, heroq);
             continue;
         }
         else if (atoi(input_arr[1]) && atoi(input_arr[1]) >= 0 && atoi(input_arr[1]) <= 731)
         {
-            struct hero heroq = topHeroByValue(database, atoi(input_arr[1]), input_arr[0]);
+            heroq = topHeroByValue(database, atoi(input_arr[1]), input_arr[0]);
             queryHero(database, heroq);
             continue;
         }
         else
         {
-            printf("Invalid command\n");
+            printf("Comando Invalido\n");
             continue;
         }
     }
@@ -633,8 +643,10 @@ int main(int argc, char **argv)
     //struct hero heroq = topHeroByName(database, thero, att);
     //struct hero heroq = topHeroByValue(database, 50, att);
     //queryHero(database, hero1);
-    free(input_arr);
+    //free(heroq);
+    free(buffer);
     free(input);
+    free(input_arr);
     free(database);
     return 0;
 }
