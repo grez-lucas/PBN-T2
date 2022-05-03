@@ -33,24 +33,40 @@ struct hero
     char *connections__relatives;
 };
 
-char** terminalDecodeStr(char* line){
+char** terminalDecodeStr(char* line, int queryType){
+    //queryType = 0 for heroQuery, 1 for topHeroByName
     int i = 0;
     line[strcspn(line, "\n")] = 0;
     char *p = strtok (line, " ");
     static char** array;
-    array = malloc(3*1024);
+    array = malloc(5*1024);
     char* dupestr;
 
     while (p != NULL)
     {   
-        if(i>2){
+        if( i> 2 && queryType == 1){
+            dupestr = strdup(p);
+            strcat(array[2], " ");
+            strcat(array[2], dupestr);
+            p = strtok (NULL, " ");
+            if(p == NULL) break;
             dupestr = strdup(p);
             strcat(array[2], " ");
             strcat(array[2], dupestr);
             break;
         }
-        array[i++] = p;
-        p = strtok (NULL, " ");
+        else if(i> 1 && queryType == 0){
+            dupestr = strdup(p);
+            strcat(array[1], " ");
+            strcat(array[1], dupestr);
+            p = strtok (NULL, " ");
+            if(p == NULL) break;
+            dupestr = strdup(p);
+            strcat(array[1], " ");
+            strcat(array[1], dupestr);
+            break;
+        }else {array[i++] = p;
+        p = strtok (NULL, " ");}
     }
     return array;
 }
@@ -165,6 +181,20 @@ struct hero *buildDB(){
     return hero_arr;
 }
 
+struct hero searchTargetHero(struct hero *database, char*target_name){
+    struct hero target_hero;
+    // search for target hero
+    for (int i = 0; i < 731; i++)
+    {
+        if (strcmp(database[i].name, target_name) == 0)
+        {
+            target_hero = database[i]; // WATCHOUT for what is a copy and what is database info
+            break;
+        };
+    } printf("DEBUG: taget_hero name: %s\n" , target_hero.name);
+    return target_hero;
+}
+
 void queryHero(struct hero *database, struct hero target_hero){
     // search for target hero
     for (int i = 0; i < 731; i++)
@@ -211,15 +241,8 @@ struct hero topHeroByName(struct hero *database, char *target_name, char *attrib
     static struct hero *hero_arr;
     struct hero target_hero;
 
-    // search for target hero
-    for (int i = 0; i < 731; i++)
-    {
-        if (strcmp(database[i].name, target_name) == 0)
-        {
-            target_hero = database[i]; // WATCHOUT for what is a copy and what is database info
-            break;
-        };
-    } printf("DEBUG: taget_hero name: %s\n" , target_hero.name);
+    target_hero = searchTargetHero(database, target_name);
+
     hero_arr = calloc(11, sizeof(struct hero));
     // define selectedAttribute
     int counter = 0;
@@ -553,6 +576,12 @@ int main(int argc, char **argv)
     char **input_arr = (char **)malloc(4 * 1024);
     char* buffer = malloc(1024);
 
+        // DEBUG :
+    for (int i = 1; i < argc; i++)
+    {
+        printf("arg%d=%s\n", i, argv[i]);
+    }
+
     if(argc == 1){
         printf("Porfavor especifique como desea correr el programa\n");
         return 0;
@@ -563,12 +592,12 @@ int main(int argc, char **argv)
     // terminal mode
     while (programMode == 1)
     {
-        printf("Ingrese una consulta:\te.g: tophero power Black Cat / power 80 / salir\n");
+        printf("Ingrese una consulta:\te.g: tophero power Black Cat / power 80 / hero Black Cat / salir\n");
         fgets(input, 1024, stdin);
 
         buffer = strdup(input);
         //DEBUG: for(int i = 0; i<731;i++) printf("%s\n", database[i].name);
-        input_arr = terminalDecodeStr(buffer);
+        input_arr = terminalDecodeStr(buffer, 1);
 
         if (strcmp(buffer, "salir") == 0)
             return 0;
@@ -576,6 +605,14 @@ int main(int argc, char **argv)
         if (strcmp(input_arr[0], "tophero") == 0)
         {
             heroq = topHeroByName(database, input_arr[2], input_arr[1]);
+            queryHero(database, heroq);
+            continue;
+        }
+        else if (strcmp(input_arr[0], "hero") == 0)
+        {
+            input_arr = terminalDecodeStr(input, 0); //probar jugando con buffer y input
+            for(int i=0; i<3; i++) printf("%s\n", input_arr[i]);
+            heroq = searchTargetHero(database, input_arr[1]);
             queryHero(database, heroq);
             continue;
         }
@@ -594,47 +631,60 @@ int main(int argc, char **argv)
     // command line mode
     while (programMode == 0)
     {
-        if (argc < 2)
+        if (argc == 1)
         {
-            printf("Insuficientes comandos\n");
+            printf("EROR: Se esperaba al menos un argumento\n");
             break;
         }
-        if (strcmp(argv[1], "-tophero"))
+        if (strcmp(argv[1], "-tophero") == 0)
         {
 
             // get hero name block
             char *target_hero_name = malloc(1024);
-            target_hero_name = argv[3];
-            switch (argc)
-            {
-            case 5:
+            int i, v = 0, size = argc - 1;
+
+            for(i = 3; i <= size; i++) {
+                target_hero_name = (char *)realloc(target_hero_name, (v + strlen(argv[i])));
+                strcat(target_hero_name, argv[i]);
+                if(i == size) break;
                 strcat(target_hero_name, " ");
-                strcat(target_hero_name, argv[4]);
-                break;
-            case 6:
-                strcat(target_hero_name, " ");
-                strcat(target_hero_name, argv[4]);
-                strcat(target_hero_name, " ");
-                strcat(target_hero_name, argv[5]);
-                break;
             }
+            printf("DEBUG: %s.\n", target_hero_name);
+
             //do query
             struct hero heroq = topHeroByName(database, target_hero_name, argv[2]);
             queryHero(database, heroq);
+            break;
+        }
+        else if (strcmp(argv[1], "-hero") == 0)
+        {
+
+            // get hero name block
+            char *target_hero_name = malloc(1024);
+            int i, v = 0, size = argc - 1;
+
+            for(i = 2; i <= size; i++) {
+                target_hero_name = (char *)realloc(target_hero_name, (v + strlen(argv[i])));
+                strcat(target_hero_name, argv[i]);
+                if(i == size) break;
+                strcat(target_hero_name, " ");
+            }
+            printf("DEBUG: %s.\n", target_hero_name);
+            //do query
+            struct hero heroq = searchTargetHero(database, target_hero_name);
+            queryHero(database, heroq);
+            break;
         }
 
-        else if (strcmp(argv[1], "-topvalue")){
+        else if (strcmp(argv[1], "-topvalue") == 0){
             struct hero heroq = topHeroByValue(database, atoi(argv[3]), argv[2]);
             queryHero(database, heroq);
+            break;
         }
         else printf("Invalid command\n");
     }
 
-    // DEBUG :
-    for (int i = 1; i < argc; i++)
-    {
-        printf("\narg%d=%s", i, argv[i]);
-    }
+
 
     //struct hero hero1 = database[0];
     //char* att = "power";
